@@ -1,0 +1,36 @@
+FROM selenium/standalone-firefox
+MAINTAINER Michael Liu <siby.george@argos.co.uk>
+
+USER root
+RUN apt-get -y update
+RUN apt-get install -y -q software-properties-common wget curl
+RUN curl -sL https://deb.nodesource.com/setup_5.x | bash -
+RUN apt-get update -y && apt-get install -y -q \
+ build-essential \
+ sed \
+ supervisor \
+ nodejs \
+ git \
+ openjdk-8-jre-headless \
+ openssh-server
+
+RUN npm install -g cucumber
+
+RUN useradd -d /home/jenkins -s /bin/bash -m jenkins
+RUN echo "jenkins:jenkins" | chpasswd
+RUN echo '%jenkins        ALL=(ALL)       NOPASSWD: ALL' >> /etc/sudoers
+RUN touch /home/jenkins/.hushlogin
+
+# Install a basic SSH server
+RUN sed -ri 's/UsePAM yes/#UsePAM yes/g' /etc/ssh/sshd_config && \
+   sed -ri 's/#UsePAM no/UsePAM no/g' /etc/ssh/sshd_config && \
+   sed -ri 's/UsePAM yes/UsePAM no/g' /etc/ssh/sshd_config && \
+   mkdir -p /var/run/sshd
+
+EXPOSE 22 4444
+
+RUN sed -ri 's/\$SCREEN_WIDTH/1360/g' /opt/bin/entry_point.sh && \
+   sed -ri 's/\$SCREEN_HEIGHT/1020/g' /opt/bin/entry_point.sh && \
+   sed -ri 's/\$SCREEN_DEPTH/24/g' /opt/bin/entry_point.sh
+
+CMD ["/usr/sbin/sshd", "-D", "-e"]
