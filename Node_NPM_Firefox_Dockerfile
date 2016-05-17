@@ -1,5 +1,5 @@
 FROM selenium/standalone-firefox
-MAINTAINER Siby George <siby.george@argos.co.uk>
+MAINTAINER Siby George <meetsiby@gmail.com>
 
 USER root
 RUN apt-get -y update
